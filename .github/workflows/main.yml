@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    environment:
+      name: production
+      url: https://gymni.ch
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      # - name: Publish
+      #   uses: cloudflare/wrangler-action@v3.3.2
+      #   with:
+      #     apiToken: ${{ secrets.CF_API_TOKEN }}
