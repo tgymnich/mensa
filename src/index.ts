@@ -53,10 +53,8 @@ export default {
 
 		let date;
 		if (path?.[1]) {
-			console.log(path[1])
 			date = moment().day(path[1]);
 		} else {
-			console.log('meh')
 			date = moment();
 		}
 
@@ -67,19 +65,25 @@ export default {
 		const menuURL = `https://tum-dev.github.io/eat-api/${location}/${year}/${week}.json`;
 		const labelURL = `https://tum-dev.github.io/eat-api/enums/labels.json`;
 
-		const menuResponse = fetch(menuURL);
-		const labelResponse = fetch(labelURL);
+		const responseHeaders = new Headers({
+			'content-type': 'text/plain;charset=UTF-8'
+		});
 
-		const dishes: MealPlan = await menuResponse.then((response) => response.json());
-		const labels: [Entry] = await labelResponse.then((response) => response.json());
+		let dishes: MealPlan;
+		let labels: [Entry];
 
-		const dict = Object.fromEntries(labels.map(item => [item.enum_name, item.abbreviation]));
-		
+		try {
+			dishes = await fetch(menuURL).then(r => r.json());
+		 	labels = await fetch(labelURL).then(r => r.json());
+		} catch (error) {
+			return new Response(`Error accessing TUM-Eat API: ${error}`, { headers: responseHeaders, status: 500 });
+		}
+
+		const labelMap = Object.fromEntries(labels.map(item => [item.enum_name, item.abbreviation]));
 		const lineLength = 80;
 		
 		const menu = dishes.days?.[day];
 		const output = menu?.dishes.map(dish => {
-
 			const priceClass = dish.prices.students;
 			const hasBasePrice = priceClass.base_price != 0;
 			const hasPricePerUnit = priceClass.price_per_unit != 0;
@@ -93,21 +97,19 @@ export default {
 				price = priceClass.price_per_unit + '€' + '/' + priceClass.unit;
 			}
 
-			const labels = dish.labels.map(label => dict[label]).reduce((acc, val) => acc + ' ' + val);
+			const labels = dish.labels.map(label => labelMap[label]).reduce((acc, val) => acc + ' ' + val);
 			const space = ' '.repeat(Math.max(1, lineLength - (dish.name.length + price.length)));
 
 			return chalk.bold(dish.name) + space + chalk.cyan(price) + '\n' + labels + '\n';
 		});
 
-		const header = `Menu at ${location} for ${date.format("dddd, MMMM Do YYYY")}:\n`;
+		const title = `Menu at ${location} for ${date.format("dddd, MMMM Do YYYY")}:\n`;
 		const hline = ' '.repeat(lineLength) + '\n';
-		
-		const msg = chalk.blueBright(header) + '\n' + (output?.reduce((acc, val) => acc + chalk.strikethrough.dim(hline) + val) || chalk.bold.red('No Menu!\n'));
 
-		return new Response(msg, {
-			headers: {
-				"content-type": "text/plain; charset=UTF-8",
-			},
-		});
+		const table = output?.reduce((acc, val) => acc + chalk.strikethrough.dim(hline) + val);
+		const errorMsg = 'No Menu!\n';
+		const response = chalk.blueBright(title) + '\n' + (table || chalk.bold.red(errorMsg));
+
+		return new Response(response, { headers: responseHeaders });
 	}
 };
