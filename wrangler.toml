@@ -1,0 +1,5 @@
+name = "mensa"
+main = "src/index.ts"
+compatibility_date = "2023-10-26"
+
+route = { pattern = "mensa.gymni.ch", custom_domain = true }
