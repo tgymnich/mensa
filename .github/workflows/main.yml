@@ -9,7 +9,7 @@ jobs:
   deploy:
     environment:
       name: production
-      url: https://gymni.ch
+      url: https://mensa.gymni.ch
     runs-on: ubuntu-latest
     name: Deploy
     steps:
