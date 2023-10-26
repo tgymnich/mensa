@@ -1,4 +1,5 @@
 import moment from 'moment';
+import 'moment/locale/de';
 import { Chalk } from 'chalk';
 const chalk = new Chalk({ level: 2 });
 
@@ -83,16 +84,17 @@ export default {
 		const lineLength = 80;
 		
 		const menu = dishes.days?.[day];
+
 		const output = menu?.dishes.map(dish => {
 			const priceClass = dish.prices.students;
 			const hasBasePrice = priceClass.base_price != 0;
 			const hasPricePerUnit = priceClass.price_per_unit != 0;
 
 			let price;
-			if (hasBasePrice) {
-				price = priceClass.base_price + '€';
-			} else if (hasBasePrice && hasPricePerUnit) {
+			if (hasBasePrice && hasPricePerUnit) {
 				price = priceClass.base_price + '€' + ' + ' + priceClass.price_per_unit + '€' + '/' + priceClass.unit;
+			} else if (hasBasePrice) {
+				price = priceClass.base_price + '€';
 			} else {
 				price = priceClass.price_per_unit + '€' + '/' + priceClass.unit;
 			}
@@ -103,11 +105,11 @@ export default {
 			return chalk.bold(dish.name) + space + chalk.cyan(price) + '\n' + labels + '\n';
 		});
 
-		const title = `Menu at ${location} for ${date.format("dddd, MMMM Do YYYY")}:\n`;
+		const title = `Menü ${location} für ${date.format("dddd, MMMM Do YYYY")}:\n`;
 		const hline = ' '.repeat(lineLength) + '\n';
 
 		const table = output?.reduce((acc, val) => acc + chalk.strikethrough.dim(hline) + val);
-		const errorMsg = 'No Menu!\n';
+		const errorMsg = 'Kein Menü!\n';
 		const response = chalk.blueBright(title) + '\n' + (table || chalk.bold.red(errorMsg));
 
 		return new Response(response, { headers: responseHeaders });
