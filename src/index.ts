@@ -73,10 +73,10 @@ export default {
 		let labels: [Entry];
 
 		try {
-			dishes = await fetch(menuURL).then(r => r.json());
-		 	labels = await fetch(labelURL).then(r => r.json());
+			dishes = await fetch(menuURL).then(r => r.ok ? r.json() : Promise.reject(r.statusText));
+			labels = await fetch(labelURL).then(r => r.ok ? r.json() : Promise.reject(r.statusText));
 		} catch (error) {
-			return new Response(`Error accessing TUM-Eat API: ${error}`, { headers: responseHeaders, status: 500 });
+			return new Response(`Error accessing TUM-Eat API: ${error}\n`, { headers: responseHeaders, status: 500 });
 		}
 
 		const labelMap = Object.fromEntries(labels.map(item => [item.enum_name, item.abbreviation]));
