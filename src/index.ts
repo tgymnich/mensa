@@ -48,13 +48,14 @@ export default {
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname.split('/').splice(1);
-		const location = path?.[0] || 'mensa-arcisstr';
+		const location = path.length == 2 ? path[0] : 'mensa-arcisstr';
+		const date_input = path.length == 2 ? path?.[1] : path?.[0];
 
 		moment.locale('de');
 
 		let date;
-		if (path?.[1]) {
-			date = moment().day(path[1]);
+		if (date_input) {
+			date = moment().day(date_input);
 		} else {
 			date = moment();
 		}
