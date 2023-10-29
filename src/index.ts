@@ -101,14 +101,25 @@ export default {
 
 			const labels = dish.labels.map(label => labelMap[label]).reduce((acc, val) => acc + ' ' + val);
 			const space = ' '.repeat(Math.max(1, lineLength - (dish.name.length + price.length)));
+			
+			let name;
+			let name_ext;
+			if (dish.name.length + price.length + 1 > lineLength) {
+				const available_space = lineLength - (price.length + 1)
+				name = dish.name.slice(0, available_space);
+				name_ext = dish.name.slice(available_space, dish.name.length) + '\n';
+			} else {
+				name = dish.name;
+				name_ext = '';
+			}
 
-			return chalk.bold(dish.name) + space + chalk.cyan(price) + '\n' + labels + '\n';
+			return chalk.bold(name) + space + chalk.cyan(price) + '\n' + chalk.bold(name_ext) + labels + '\n';
 		});
 
 		const title = `Menü ${location} für ${date.format("dddd, MMMM Do YYYY")}:\n`;
-		const hline = ' '.repeat(lineLength) + '\n';
+		const hline = '─'.repeat(lineLength - 1) + '┘' + '\n';
 
-		const table = output?.reduce((acc, val) => acc + chalk.strikethrough.dim(hline) + val);
+		const table = output?.reduce((acc, val) => acc + chalk.dim(hline) + val);
 		const errorMsg = 'Kein Menü!\n';
 		const response = chalk.blueBright(title) + '\n' + (table || chalk.bold.red(errorMsg));
 
