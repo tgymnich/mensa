@@ -1,6 +1,6 @@
 # Mensa CLI
 
-A small little cloudflare worker that can be used with curl to show the current cafeteria menu.
+A small cloudflare worker that can be used with curl to show the current cafeteria menu.
 
 # Usage
 
