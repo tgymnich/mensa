@@ -44,6 +44,12 @@ interface Text {
 	EN: string;
 }
 
+interface Queue {
+	count: number;
+	maxCount: number;
+	percent: number;
+}
+
 export default {
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
@@ -64,12 +70,22 @@ export default {
 		const week = date.week();
 		const year = date.year();
 
+		const queueURL = `https://api.tum.app/v1/canteen/headCount/${location}`;
 		const menuURL = `https://tum-dev.github.io/eat-api/${location}/${year}/${week}.json`;
 		const labelURL = `https://tum-dev.github.io/eat-api/enums/labels.json`;
 
 		const responseHeaders = new Headers({
 			'content-type': 'text/plain;charset=UTF-8'
 		});
+
+		let queue: Queue | undefined;
+		if (moment(date).isSame(moment(), 'day')) {
+			try {
+				queue = await fetch(queueURL).then(r => r.ok ? r.json() : Promise.reject(r.statusText));
+			} catch {
+				// we don't necessarily need this...
+			}
+		}
 
 		let dishes: MealPlan;
 		let labels: [Entry];
@@ -118,11 +134,18 @@ export default {
 		});
 
 		const title = `Menü ${location} für ${date.format("dddd, MMMM Do YYYY")}:\n`;
-		const hline = '─'.repeat(lineLength - 1) + '┘' + '\n';
 
+		let occupation : string | undefined;
+		if (queue) {
+			const lhs = lineLength *  (queue.count / (queue.maxCount))
+			const rhs = lineLength - lhs;
+			occupation = 'Schlange:' + '\n' + chalk.green('▇').repeat(lhs) + chalk.cyan('▇').repeat(rhs) + '\n' + '\n';
+		}
+
+		const hline = '─'.repeat(lineLength - 1) + '┘' + '\n';
 		const table = output?.reduce((acc, val) => acc + chalk.dim(hline) + val);
 		const errorMsg = 'Kein Menü!\n';
-		const response = chalk.blueBright(title) + '\n' + (table || chalk.bold.red(errorMsg));
+		const response = chalk.blueBright(title) + '\n' + (occupation || '') + (table || chalk.bold.red(errorMsg));
 
 		return new Response(response, { headers: responseHeaders });
 	}
