@@ -116,7 +116,7 @@ export default {
 				price = priceClass.price_per_unit + '€' + '/' + priceClass.unit;
 			}
 
-			const labels = dish.labels.map(label => labelMap[label]).reduce((acc, val) => acc + ' ' + val);
+			const labels = dish.labels.map(label => labelMap[label]).reduce((acc, val) => acc + ' ' + val, "");
 			const space = ' '.repeat(Math.max(1, lineLength - (dish.name.length + price.length)));
 			
 			let name;
@@ -143,7 +143,7 @@ export default {
 		}
 
 		const hline = '─'.repeat(lineLength - 1) + '┘' + '\n';
-		const table = output?.reduce((acc, val) => acc + chalk.dim(hline) + val);
+		const table = output?.reduce((acc, val) => acc + chalk.dim(hline) + val, "");
 		const errorMsg = 'Kein Menü!\n';
 		const response = chalk.blueBright(title) + '\n' + (occupation || '') + (table || chalk.bold.red(errorMsg));
 
