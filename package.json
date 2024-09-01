@@ -2,7 +2,7 @@
   "name": "mensa",
   "version": "0.0.0",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240725.0",
+    "@cloudflare/workers-types": "^4.20240821.1",
     "typescript": "^5.5.3",
     "wrangler": "3.68.0"
   },
